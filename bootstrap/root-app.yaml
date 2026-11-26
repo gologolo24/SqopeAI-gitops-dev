@@ -1,0 +1,21 @@
+# App-of-apps: the only manifest applied by hand (or by the infra repo's Terraform) once per cluster.
+# It makes ArgoCD manage argocd/ itself, so even the AppProject and ApplicationSet change only via git.
+#   kubectl apply -n argocd -f bootstrap/root-app.yaml
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: sqope-dev-root
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/gologolo24/sqope-ai-gitops-dev.git
+    targetRevision: main
+    path: argocd
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: argocd
+  syncPolicy:
+    automated:
+      prune: false # never auto-delete the project/applicationset
+      selfHeal: true

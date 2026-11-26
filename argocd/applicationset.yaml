@@ -1,0 +1,58 @@
+# One ArgoCD Application per folder in apps/. Adding a service = adding apps/<name>/values.yaml.
+# Each Application combines two sources:
+#   1. the shared "generic" chart, pulled from ECR as an OCI artifact at a pinned version
+#   2. this repo, referenced as $values, for apps/<name>/values.yaml
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: sqope-dev-services
+  namespace: argocd
+spec:
+  goTemplate: true
+  goTemplateOptions: ["missingkey=error"]
+  generators:
+    - git:
+        repoURL: https://github.com/gologolo24/sqope-ai-gitops-dev.git
+        revision: main
+        directories:
+          - path: apps/*
+  # Safety: removing a folder (or the ApplicationSet) never cascades into deleting running workloads.
+  syncPolicy:
+    preserveResourcesOnDeletion: true
+  template:
+    metadata:
+      name: "{{ .path.basename }}-dev"
+      labels:
+        environment: dev
+        service: "{{ .path.basename }}"
+    spec:
+      project: sqope-dev
+      sources:
+        - repoURL: 123456789012.dkr.ecr.eu-central-1.amazonaws.com/chart
+          chart: generic
+          # Chart upgrades are deliberate: bump this in a PR after helm-chart-cicd releases a version.
+          targetRevision: 1.0.0
+          helm:
+            releaseName: "{{ .path.basename }}"
+            valueFiles:
+              - "$values/{{ .path.path }}/values.yaml"
+        - repoURL: https://github.com/gologolo24/sqope-ai-gitops-dev.git
+          targetRevision: main
+          ref: values
+      destination:
+        server: https://kubernetes.default.svc
+        namespace: "{{ .path.basename }}"
+      syncPolicy:
+        automated:
+          prune: true    # resources removed from git are removed from the cluster
+          selfHeal: true # manual kubectl changes are reverted to what git says
+        syncOptions:
+          - CreateNamespace=true
+          - ServerSideApply=true
+        retry:
+          limit: 5
+          backoff:
+            duration: 10s
+            factor: 2
+            maxDuration: 3m
+      revisionHistoryLimit: 10

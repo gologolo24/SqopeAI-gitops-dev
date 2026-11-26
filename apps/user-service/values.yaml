@@ -1,0 +1,16 @@
+# user-service @ dev. Rendered with the shared "generic" chart pulled from ECR (see argocd/).
+# image.tag is written by SqopeAI CI (.github/workflows/main.yml) on every merge to main: do not edit by hand,
+# roll back with `git revert` instead.
+image:
+  repository: 123456789012.dkr.ecr.eu-central-1.amazonaws.com/sqope-ai/user-service
+  tag: not-yet-built
+replicaCount: 2
+env:
+  ENVIRONMENT: dev
+  LOG_LEVEL: INFO
+resources:
+  requests:
+    cpu: 100m
+    memory: 128Mi
+  limits:
+    memory: 256Mi

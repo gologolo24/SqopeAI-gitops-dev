@@ -1,0 +1,33 @@
+# Least-privilege boundary for everything deployed to dev: which sources ArgoCD may pull from,
+# where it may deploy, and which kinds of resources the apps may create.
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: sqope-dev
+  namespace: argocd
+spec:
+  description: Sqope AI microservices - dev environment
+  sourceRepos:
+    - https://github.com/gologolo24/sqope-ai-gitops-dev.git  # values
+    - 123456789012.dkr.ecr.eu-central-1.amazonaws.com/chart   # generic chart (OCI)
+  destinations:
+    - server: https://kubernetes.default.svc
+      namespace: "*-service"
+  clusterResourceWhitelist:
+    - group: ""
+      kind: Namespace
+  namespaceResourceWhitelist:
+    - group: ""
+      kind: Service
+    - group: ""
+      kind: ServiceAccount
+    - group: apps
+      kind: Deployment
+    - group: autoscaling
+      kind: HorizontalPodAutoscaler
+    - group: policy
+      kind: PodDisruptionBudget
+    - group: networking.k8s.io
+      kind: Ingress
+    - group: monitoring.coreos.com
+      kind: ServiceMonitor
