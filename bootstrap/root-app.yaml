@@ -9,7 +9,7 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: https://github.com/gologolo24/sqope-ai-gitops-dev.git
+    repoURL: https://github.com/gologolo24/SqopeAI-gitops-dev.git
     targetRevision: main
     path: argocd
   destination:

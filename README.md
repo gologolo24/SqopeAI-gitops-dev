@@ -1,4 +1,4 @@
-# sqope-ai-gitops-dev
+# SqopeAI-gitops-dev
 
 The **desired state of the Sqope AI `dev` environment**. ArgoCD continuously makes the cluster
 match this repo.
@@ -38,7 +38,7 @@ sequenceDiagram
     participant Dev as Developer
     participant CI as SqopeAI · services-main
     participant ECR as Amazon ECR
-    participant Git as sqope-ai-gitops-dev
+    participant Git as SqopeAI-gitops-dev
     participant Argo as ArgoCD
     participant K8s as Kubernetes (dev)
     Dev->>CI: merge PR to main
